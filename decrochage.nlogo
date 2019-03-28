@@ -270,15 +270,48 @@ NIL
 HORIZONTAL
 
 SLIDER
-990
-165
-1162
-198
-oui
-oui
+750
+20
+922
+53
+Difficulte_des_cours
+Difficulte_des_cours
 0
-100
+10
 3.0
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+750
+120
+1130
+400
+Taux de décrochage par semaine
+Semaine passée
+Taux de décrochage
+0.0
+52.0
+0.0
+100.0
+false
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
+
+SLIDER
+750
+70
+922
+103
+Mode
+Mode
+0
+2
+2.0
 1
 1
 NIL
