@@ -1,29 +1,29 @@
 globals [
-  attendance        ;; the current attendance at the bar C LA PRESENCE EN CLASSE
+  attendance        ;; the current attendance at the classe C LA PRESENCE EN CLASSE
   history           ;; list of past values of attendance LES LOGS DE SA PRESENCE EN COURS
   home-patches      ;; agentset of green patches representing the residential area C HORS DE LA CLASSE
-  bar-patches       ;; agentset of blue patches representing the bar area C LA CLASSE
-  crowded-patch     ;; patch where we show the "CROWDED" label
+  classe-patches       ;; agentset of blue patches representing the classe area C LA CLASSE
+  decrochage-patch     ;; patch where we show the "decrochage" label
 ]
+breed [ groupe a-groupe ]
+breed [ etudiant a-etudiant ]
 
 turtles-own [
   strategies      ;; list of strategies
   best-strategy   ;; index of the current best strategy
-  attend?         ;; true if the agent currently plans to attend the bar
-  prediction      ;; current prediction of the bar attendance
+  attend?         ;; true if the agent currently plans to attend the classe
+  prediction      ;; current prediction of the classe attendance
 ]
-
 to setup
   clear-all
-  set-default-shape turtles "person"
 
   ;; create the 'homes'
   set home-patches patches with [pycor < 0 or (pxcor <  0 and pycor >= 0)]
   ask home-patches [ set pcolor green ]
 
-  ;; create the 'bar'
-  set bar-patches patches with [ pxcor > -7 and pycor > -7 and pxcor < 7 and pycor < 7]
-  ask bar-patches [ set pcolor red ]
+  ;; create the 'classe'
+  set classe-patches patches with [ pxcor > 0 and pycor > 0]
+  ask classe-patches [ set pcolor blue ]
 
   ;; initialize the previous attendance randomly so the agents have a history
   ;; to work with from the start
@@ -34,23 +34,37 @@ to setup
   set attendance first history
 
   ;; use one of the patch labels to visually indicate whether or not the
-  ;; bar is "crowded"
-  ask patch (0.75 * max-pxcor) (0.5 * max-pycor) [
-    set crowded-patch self
+  ;; classe is "decrochage"
+  ask patch (0.75 * max-pxcor) (0.75 * max-pycor) [
+    set decrochage-patch self
     set plabel-color red
   ]
 
   ;; create the agents and give them random strategies
   ;; these are the only strategies these agents will ever have though they
   ;; can change which of this "bag of strategies" they use every tick
-  create-turtles 100 [
-    set color yellow
+
+   create-groupe initial-number-groupe  ; create the groupe, then initialize their variables
+  [
+    set shape  "circle"
+    set color red
+    set size 5
     move-to-empty-one-of home-patches
     set strategies n-values number-strategies [random-strategy]
     set best-strategy first strategies
     update-strategies
   ]
 
+
+  create-etudiant initial-number-etudiant  ; create the etudiant, then initialize their variables
+  [
+    set shape  "person"
+    set color yellow
+    move-to-empty-one-of home-patches
+    set strategies n-values number-strategies [random-strategy]
+    set best-strategy first strategies
+    update-strategies
+  ]
   ;; start the clock
   reset-ticks
 end
@@ -58,24 +72,24 @@ end
 
 to go
   ;; update the global variables
-  ask crowded-patch [ set plabel "" ]
-  ;; each agent predicts attendance at the bar and decides whether or not to go
+  ask decrochage-patch [ set plabel "" ]
+  ;; each agent predicts attendance at the classe and decides whether or not to go
   ask turtles [
     set prediction predict-attendance best-strategy sublist history 0 memory-size
-    set attend? (prediction <= overcrowding-threshold)  ;; true or false THRESHOLD C LE POURCENTAGE POUR AFFICHER CROWNED
+    set attend? (prediction <= overcrowding-threshold)  ;; true or false THRESHOLD C LE POURCENTAGE POUR AFFICHER LE PATCH DECROCHAGE
   ]
-  ;; depending on their decision, the agents go to the bar or stay at home
+  ;; depending on their decision, the agents go to the classe or stay at home
   ask turtles [
     ifelse attend?
-      [ move-to-empty-one-of bar-patches
+      [ move-to-empty-one-of classe-patches
         set attendance attendance + 1 ]
       [ move-to-empty-one-of home-patches ]
   ]
 
-  ;; if the bar is crowded indicate that in the view
-  set attendance count turtles-on bar-patches
+  ;; if the classe is decrochage indicate that in the view
+  set attendance count turtles-on classe-patches
   if attendance < overcrowding-threshold [
-    ask crowded-patch [ set plabel "DECROCHAGE" ]
+    ask decrochage-patch [ set plabel "DECROCHAGE" ]
   ]
   ;; update the attendance history
   ;; remove oldest attendance and prepend latest attendance
@@ -84,6 +98,7 @@ to go
   ask turtles [ update-strategies ]
   ;; advance the clock
   tick
+  if ticks >= 35 [stop]
 end
 
 ;; determines which strategy would have predicted the best results had it been used this round.
@@ -122,11 +137,11 @@ end
 ;; More specifically, the strategy is then described by the formula
 ;; p(t) = x(t - 1) * a(t - 1) + x(t - 2) * a(t -2) +..
 ;;      ... + x(t - MEMORY-SIZE) * a(t - MEMORY-SIZE) + c * 100,
-;; where p(t) is the prediction at time t, x(t) is the attendance of the bar at time t,
+;; where p(t) is the prediction at time t, x(t) is the attendance of the classe at time t,
 ;; a(t) is the weight for time t, c is a constant, and MEMORY-SIZE is an external parameter.
 to-report predict-attendance [strategy subhistory]
   ;; the first element of the strategy is the constant, c, in the prediction formula.
-  ;; one can think of it as the the agent's prediction of the bar's attendance
+  ;; one can think of it as the the agent's prediction of the classe's attendance
   ;; in the absence of any other data
   ;; then we multiply each week in the history by its respective weight
   report 100 * first strategy + sum (map [ [weight week] -> weight * week ] butfirst strategy subhistory)
@@ -134,7 +149,7 @@ end
 
 ;; In this model it doesn't really matter exactly which patch
 ;; a turtle is on, only whether the turtle is in the home area
-;; or the bar area.  Nonetheless, to make a nice visualization
+;; or the classe area.  Nonetheless, to make a nice visualization
 ;; this procedure is used to ensure that we only have one
 ;; turtle per patch.
 to move-to-empty-one-of [locations]  ;; turtle procedure
@@ -293,7 +308,7 @@ Taux de décrochage par semaine
 Semaine passée
 Taux de décrochage
 0.0
-52.0
+35.0
 0.0
 100.0
 false
@@ -312,6 +327,36 @@ Mode
 0
 2
 2.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+945
+70
+1122
+103
+initial-number-etudiant
+initial-number-etudiant
+0
+100
+42.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+945
+20
+1117
+53
+initial-number-groupe
+initial-number-groupe
+0
+20
+4.0
 1
 1
 NIL
