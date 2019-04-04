@@ -46,7 +46,7 @@ to setup
 
    create-groupe initial-number-groupe  ; create the groupe, then initialize their variables
   [
-    set shape  "circle"
+    set shape  "square 2"
     set color red
     set size 5
     move-to-empty-one-of home-patches
@@ -64,6 +64,10 @@ to setup
     set strategies n-values number-strategies [random-strategy]
     set best-strategy first strategies
     update-strategies
+    create-link-with one-of groupe [
+      set color red
+
+  ]
   ]
   ;; start the clock
   reset-ticks
@@ -341,7 +345,7 @@ initial-number-etudiant
 initial-number-etudiant
 0
 100
-42.0
+72.0
 1
 1
 NIL
