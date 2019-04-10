@@ -46,10 +46,11 @@ to setup
 
    create-groupe initial-number-groupe  ; create the groupe, then initialize their variables
   [
+
     set shape  "square 2"
     set color red
     set size 5
-    move-to-empty-one-of home-patches
+    setxy random max-pxcor random max-pycor
     set strategies n-values number-strategies [random-strategy]
     set best-strategy first strategies
     update-strategies
@@ -60,7 +61,7 @@ to setup
   [
     set shape  "person"
     set color yellow
-    move-to-empty-one-of home-patches
+
     set strategies n-values number-strategies [random-strategy]
     set best-strategy first strategies
     update-strategies
@@ -83,7 +84,7 @@ to go
     set attend? (prediction <= overcrowding-threshold)  ;; true or false THRESHOLD C LE POURCENTAGE POUR AFFICHER LE PATCH DECROCHAGE
   ]
   ;; depending on their decision, the agents go to the classe or stay at home
-  ask turtles [
+  ask etudiant [
     ifelse attend?
       [ move-to-empty-one-of classe-patches
         set attendance attendance + 1 ]
@@ -330,7 +331,7 @@ Mode
 Mode
 0
 2
-2.0
+0.0
 1
 1
 NIL
@@ -345,7 +346,7 @@ initial-number-etudiant
 initial-number-etudiant
 0
 100
-72.0
+58.0
 1
 1
 NIL
@@ -360,7 +361,7 @@ initial-number-groupe
 initial-number-groupe
 0
 20
-4.0
+14.0
 1
 1
 NIL
