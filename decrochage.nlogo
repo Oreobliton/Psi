@@ -6,8 +6,6 @@ globals [
   decrochage-patch     ;; patch where we show the "decrochage" label
 ]
 breed [ groupe a-groupe ]
-breed [ etudiant a-etudiant ]
-
 turtles-own [
   strategies      ;; list of strategies
   best-strategy   ;; index of the current best strategy
@@ -22,7 +20,7 @@ to setup
   ask home-patches [ set pcolor green ]
 
   ;; create the 'classe'
-  set classe-patches patches with [ pxcor > 0 and pycor > 0]
+  set classe-patches patches with [ pxcor > -3 and pycor > -3]
   ask classe-patches [ set pcolor blue ]
 
   ;; initialize the previous attendance randomly so the agents have a history
@@ -55,21 +53,6 @@ to setup
     set best-strategy first strategies
     update-strategies
   ]
-
-
-  create-etudiant initial-number-etudiant  ; create the etudiant, then initialize their variables
-  [
-    set shape  "person"
-    set color yellow
-
-    set strategies n-values number-strategies [random-strategy]
-    set best-strategy first strategies
-    update-strategies
-    create-link-with one-of groupe [
-      set color red
-
-  ]
-  ]
   ;; start the clock
   reset-ticks
 end
@@ -84,7 +67,7 @@ to go
     set attend? (prediction <= overcrowding-threshold)  ;; true or false THRESHOLD C LE POURCENTAGE POUR AFFICHER LE PATCH DECROCHAGE
   ]
   ;; depending on their decision, the agents go to the classe or stay at home
-  ask etudiant [
+  ask groupe [
     ifelse attend?
       [ move-to-empty-one-of classe-patches
         set attendance attendance + 1 ]
@@ -106,12 +89,6 @@ to go
   if ticks >= 35 [stop]
 end
 
-;; determines which strategy would have predicted the best results had it been used this round.
-;; the best strategy is the one that has the sum of smallest differences between the
-;; current attendance and the predicted attendance for each of the preceding
-;; weeks (going back MEMORY-SIZE weeks)
-;; this does not change the strategies at all, but it does (potentially) change the one
-;; currently being used and updates the performance of all strategies
 to update-strategies
   ;; initialize best-score to a maximum, which is the lowest possible score
   let best-score memory-size * 100 + 1
@@ -130,33 +107,14 @@ to update-strategies
   ]
 end
 
-;; this reports a random strategy. a strategy is just a set of weights from -1.0 to 1.0 which
-;; determines how much emphasis is put on each previous time period when making
-;; an attendance prediction for the next time period
 to-report random-strategy
   report n-values (memory-size + 1) [1.0 - random-float 2.0]
 end
 
-;; This reports an agent's prediction of the current attendance
-;; using a particular strategy and portion of the attendance history.
-;; More specifically, the strategy is then described by the formula
-;; p(t) = x(t - 1) * a(t - 1) + x(t - 2) * a(t -2) +..
-;;      ... + x(t - MEMORY-SIZE) * a(t - MEMORY-SIZE) + c * 100,
-;; where p(t) is the prediction at time t, x(t) is the attendance of the classe at time t,
-;; a(t) is the weight for time t, c is a constant, and MEMORY-SIZE is an external parameter.
 to-report predict-attendance [strategy subhistory]
-  ;; the first element of the strategy is the constant, c, in the prediction formula.
-  ;; one can think of it as the the agent's prediction of the classe's attendance
-  ;; in the absence of any other data
-  ;; then we multiply each week in the history by its respective weight
   report 100 * first strategy + sum (map [ [weight week] -> weight * week ] butfirst strategy subhistory)
 end
 
-;; In this model it doesn't really matter exactly which patch
-;; a turtle is on, only whether the turtle is in the home area
-;; or the classe area.  Nonetheless, to make a nice visualization
-;; this procedure is used to ensure that we only have one
-;; turtle per patch.
 to move-to-empty-one-of [locations]  ;; turtle procedure
   move-to one-of locations
   while [any? other turtles-here] [
