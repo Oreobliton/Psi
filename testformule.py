@@ -15,23 +15,20 @@ def pb_perso():
         print(1)
         return 1
 
-
-decrochage_base = uniform(0.95, 1.05)
-difficulte = 1
-filiere = uniform(0.95, 1)
-note = ((randint(0, 20))/20)
-influence = uniform(0.10, 1)
-pb_perso1 = pb_perso()
-
-def decrochage(decrochage_base, difficulte, filiere, note, influence, pb_perso1):
+def decrochage():
+    decrochage_base = uniform(0.98, 1.02)
+    difficulte = 1
+    filiere = uniform(0.95, 1)
+    note = ((randint(0, 25))/20)
+    influence = uniform(0.10, 1)
+    pb_perso1 = pb_perso()
     pourcent_decrochage = (decrochage_base * difficulte * filiere * pb_perso1 * influence * note)
-    j = 0
-    for k in range(1000000):
-        i = randint(0, 100)/100
-        if (i <= pourcent_decrochage):
-           
-            j+= 1
-    print(j/1000000)
+    print(pourcent_decrochage)
+    return pourcent_decrochage
 
-
-decrochage(decrochage_base, difficulte, filiere, note, influence, pb_perso1)
+j = 0
+for k in range(20):
+    i = randint(0, 100)/100
+    if (i <= decrochage()):
+        j+= 1
+print(j/20)
