@@ -57,19 +57,8 @@ to setup
   ]
 
 
-  create-etudiant initial-number-etudiant  ; create the etudiant, then initialize their variables
-  [
-    set shape  "person"
-    set color yellow
 
-    set strategies n-values number-strategies [random-strategy]
-    set best-strategy first strategies
-    update-strategies
-    create-link-with one-of groupe [
-      set color red
 
-  ]
-  ]
   ;; start the clock
   reset-ticks
 end
