@@ -11,7 +11,7 @@ turtles-own [
   influence
   pourcent_decrochage
   taux
-  machine
+  machine_decrochage
   compteur
   decrocher
   recrochage_base
@@ -35,27 +35,35 @@ to setup
     set note random 25 / 20
     set influence random-float 0.1 + 0.9
     set pb_perso random-float 0.2 + 0.9
-    set recrochage_base  0
+    set recrochage_base  0.2
   ]
   reset-ticks
 end
 
 to go
   ask turtles [
-    set machine random-float 1.0 + 0.2
+    set machine_decrochage random-float 1.0 + 0.2
     set label int (pourcent_decrochage * 100)
     if decrocher = 0[ set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * influence * decrochage_base)]
     if decrocher = 0[set taux random-float 0.4 + 0.8]
     if decrocher = 0[set pourcent_decrochage  (pourcent_decrochage * taux)]
-    if decrocher = 0 [if machine < pourcent_decrochage [set color rgb 255 140 0]]
+    if decrocher = 0 [if machine_decrochage < pourcent_decrochage [set color rgb 255 140 0]]
     if decrocher = 0[
-      if machine < pourcent_decrochage [set compteur (compteur + 1)]]
+      if machine_decrochage < pourcent_decrochage [set compteur (compteur + 1)]]
     if decrocher = 0[
-      if machine > pourcent_decrochage [set color rgb 0 255 0]]
+      if machine_decrochage > pourcent_decrochage [set color rgb 0 255 0]]
     if decrocher = 0[
-      if machine > pourcent_decrochage [set compteur 0]]
+      if machine_decrochage > pourcent_decrochage [set compteur 0]]
     if compteur > 2 [set color rgb 255 0 0]
     if compteur > 2 [set decrocher 1]
+
+
+    ;ICI ON DOIT GERER LE RECROCHAGE
+
+
+
+
+
   ]
 
   tick
@@ -132,7 +140,7 @@ Difficulte_des_cours
 Difficulte_des_cours
 0.5
 1.5
-1.0
+0.5
 0.5
 1
 NIL
