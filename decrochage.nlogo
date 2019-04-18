@@ -1,38 +1,26 @@
 globals [
-  attendance        ;; the current attendance at the classe C LA PRESENCE EN CLASSE
-  history           ;; list of past values of attendance LES LOGS DE SA PRESENCE EN COURS
   classe-patches       ;; agentset of blue patches representing the classe area C LA CLASSE
-
-
-
 ]
 breed [ groupe a-groupe ]
 
 turtles-own [
-  strategies      ;; list of strategies
-  best-strategy   ;; index of the current best strategy
-  attend?         ;; true if the agent currently plans to attend the classe
-  prediction      ;; current prediction of the classe attendance
-
-
   decrochage_base
   filiere
   note
   pb_perso
   influence
   pourcent_decrochage
+  taux
+  machine
+  compteur
+  decrocher
+  recrochage_base
+  pourcent_recrochage
 ]
 to setup
   clear-all
   set classe-patches patches
   ask classe-patches [ set pcolor blue ]
-  ;; initialize the previous attendance randomly so the agents have a history
-  ;; to work with from the start
-  set history n-values (memory-size * 2) [random 100]
-  ;; the history is twice the memory, because we need at least a memory worth of history
-  ;; for each point in memory to test how well the strategies would have worked
-
-  set attendance first history
 
    create-groupe initial-number-groupe  ; create the groupe, then initialize their variables
   [
@@ -40,65 +28,38 @@ to setup
     set color rgb 0 255 0
     set size 5
     setxy random-xcor random-ycor
+    set decrocher 0
+    set compteur 0
     set decrochage_base random-float 0.04 + 0.98
     set filiere random-float 0.06 + 0.95
     set note random 25 / 20
     set influence random-float 0.1 + 0.9
     set pb_perso random-float 0.2 + 0.9
-    set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * influence * decrochage_base)
-
-    set strategies n-values number-strategies [random-strategy]
-    set best-strategy first strategies
-    update-strategies
+    set recrochage_base  0
   ]
-
   reset-ticks
 end
 
-
 to go
   ask turtles [
+    set machine random-float 1.0 + 0.2
     set label int (pourcent_decrochage * 100)
-    set prediction predict-attendance best-strategy sublist history 0 memory-size
-    if (pourcent_decrochage * 100) > overcrowding-threshold [set color rgb 255 0 0]
+    if decrocher = 0[ set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * influence * decrochage_base)]
+    if decrocher = 0[set taux random-float 0.4 + 0.8]
+    if decrocher = 0[set pourcent_decrochage  (pourcent_decrochage * taux)]
+    if decrocher = 0 [if machine < pourcent_decrochage [set color rgb 255 140 0]]
+    if decrocher = 0[
+      if machine < pourcent_decrochage [set compteur (compteur + 1)]]
+    if decrocher = 0[
+      if machine > pourcent_decrochage [set color rgb 0 255 0]]
+    if decrocher = 0[
+      if machine > pourcent_decrochage [set compteur 0]]
+    if compteur > 2 [set color rgb 255 0 0]
+    if compteur > 2 [set decrocher 1]
   ]
 
-  ;; if the classe is decrochage indicate that in the view
-  set attendance count turtles-on classe-patches
-  ;; update the attendance history
-  ;; remove oldest attendance and prepend latest attendance
-  set history fput attendance but-last history
-  ;; the agents decide what the new best strategy is
-  ask turtles [ update-strategies ]
-  ;; advance the clock
   tick
   if ticks >= 35 [stop]
-end
-
-to update-strategies
-  ;; initialize best-score to a maximum, which is the lowest possible score
-  let best-score memory-size * 100 + 1
-  foreach strategies [ the-strategy ->
-    let score 0
-    let week 1
-    repeat memory-size [
-      set prediction predict-attendance the-strategy sublist history week (week + memory-size)
-      set score score + abs (item (week - 1) history - prediction)
-      set week week + 1
-    ]
-    if (score <= best-score) [
-      set best-score score
-      set best-strategy the-strategy
-    ]
-  ]
-end
-
-to-report random-strategy
-  report n-values (memory-size + 1) [1.0 - random-float 2.0]
-end
-
-to-report predict-attendance [strategy subhistory]
-  report 100 * first strategy + sum (map [ [weight week] -> weight * week ] butfirst strategy subhistory)
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -130,9 +91,9 @@ ticks
 
 BUTTON
 170
-145
+185
 233
-178
+218
 go
 go
 T
@@ -147,9 +108,9 @@ NIL
 
 BUTTON
 40
-143
+185
 106
-176
+218
 setup
 setup
 NIL
@@ -163,127 +124,50 @@ NIL
 1
 
 SLIDER
-41
-37
-231
-70
-memory-size
-memory-size
+40
+30
+230
+63
+Difficulte_des_cours
+Difficulte_des_cours
+0.5
+1.5
+1.0
+0.5
 1
+NIL
+HORIZONTAL
+
+PLOT
 10
-1.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-41
-72
-231
-105
-number-strategies
-number-strategies
-1
-20
-10.0
-1
-1
-NIL
-HORIZONTAL
-
-PLOT
-11
-196
+225
 285
-408
-Bar Attendance
-Time
-Attendance
-0.0
-10.0
-0.0
-100.0
-true
-false
-"" ""
-PENS
-"attendance" 1.0 0 -16777216 true "" "plot attendance"
-"threshold" 1.0 0 -2674135 true "" ";; plot a threshold line -- an attendance level above this line makes the bar\n;; is unappealing, but below this line is appealing\nplot-pen-reset\nplotxy 0 overcrowding-threshold\nplotxy plot-x-max overcrowding-threshold"
-
-SLIDER
-41
-107
-231
-140
-overcrowding-threshold
-overcrowding-threshold
-0
-100
-100.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-750
-20
-922
-53
-Difficulte_des_cours
-Difficulte_des_cours
-0
-2
-1.0
-1
-1
-NIL
-HORIZONTAL
-
-PLOT
-750
-120
-1130
-400
-Taux de décrochage par semaine
+445
+Groupes qui ont décroché
 Semaine passée
-Taux de décrochage
+Nombre de groupe
 0.0
 35.0
 0.0
-100.0
+20.0
 false
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles"
+"default" 1.0 0 -5298144 true "" "plot count turtles with [color = rgb 255 0 0]"
+"pen-1" 1.0 0 -14439633 true "" "plot count turtles with [color = rgb 0 255 0]"
+"pen-2" 1.0 0 -955883 true "" "plot count turtles with [color = rgb 255 140 0]"
 
 SLIDER
-750
-70
-922
-103
-Mode
-Mode
-0
-2
-0.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-945
-20
-1117
-53
+40
+80
+230
+113
 initial-number-groupe
 initial-number-groupe
 0
 20
-14.0
+20.0
 1
 1
 NIL
