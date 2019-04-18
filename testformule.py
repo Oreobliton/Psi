@@ -12,13 +12,12 @@ class Groupe():
         self.influence = influence()
         self.pb_perso = pb_perso()
         self.note = True
-        self.taux_Decrochage = 0
+        self.taux_Decrochage = 0.0
                 
         
     def decrochage(self):
         taux_decrochage = (self.decrochage_base * difficulte * self.filiere * self.pb_perso * self.influence * self.note)
-        self.taux_Decrochage = taux_decrochage
-        
+        return taux_decrochage
     
     def variationDurantLannee(self): #permet de faire evoluer le taux tout au long de l'année.
         taux = randint(80,120)/100
@@ -75,8 +74,6 @@ def simulation():
             promo[i].variationDurantLannee()
             print(promo[i].debug())
         semaine+=1 
-  
-
 #Péartie test  
 """PENSER AU RECROCHAGE"""
 #testMoy()
