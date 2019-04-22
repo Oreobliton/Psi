@@ -32,8 +32,7 @@ to setup
     set compteur 0
     set decrochage_base random-float 0.04 + 0.98
     set filiere random-float 0.06 + 0.95
-    set note random 25 / 20
-    set influence random-float 0.1 + 0.9
+    set influence random-float 0.1 + 0.8
     set pb_perso random-float 0.2 + 0.9
     set recrochage_base  0.2
   ]
@@ -44,7 +43,10 @@ to go
   ask turtles [
     set machine_decrochage random-float 1.0 + 0.2
     set label int (pourcent_decrochage * 100)
-    if decrocher = 0[ set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * influence * decrochage_base)]
+    if ticks = 16 [ if compteur > 1 [set note  25 / 20 + 0.3]]
+    if ticks = 16 [ if compteur = 0 [set note  10 / 20]]
+    if decrocher = 0 [ set pourcent_decrochage  (Difficulte_des_cours * filiere * pb_perso * influence * decrochage_base)]
+    if decrocher = 0 and (ticks = 16 or ticks = 17 or ticks = 18 or ticks = 19)[ set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * influence * decrochage_base)]
     if decrocher = 0[set taux random-float 0.4 + 0.8]
     if decrocher = 0[set pourcent_decrochage  (pourcent_decrochage * taux)]
     if decrocher = 0 [if machine_decrochage < pourcent_decrochage [set color rgb 255 140 0]]
