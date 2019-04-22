@@ -1,5 +1,5 @@
 globals [
-  classe-patches       ;; agentset of blue patches representing the classe area C LA CLASSE
+  classe-patches
 ]
 breed [ groupe a-groupe ]
 
@@ -8,21 +8,21 @@ turtles-own [
   filiere
   note
   pb_perso
-  influence
   pourcent_decrochage
   taux
   machine_decrochage
+  machine_recrochage
   compteur
   decrocher
-  recrochage_base
   pourcent_recrochage
+  revenir
 ]
 to setup
   clear-all
   set classe-patches patches
   ask classe-patches [ set pcolor blue ]
 
-   create-groupe initial-number-groupe  ; create the groupe, then initialize their variables
+   create-groupe initial-number-groupe
   [
     set shape  "square 2"
     set color rgb 0 255 0
@@ -32,21 +32,19 @@ to setup
     set compteur 0
     set decrochage_base random-float 0.04 + 0.98
     set filiere random-float 0.06 + 0.95
-    set influence random-float 0.1 + 0.8
     set pb_perso random-float 0.2 + 0.9
-    set recrochage_base  0.2
+    set revenir random-float 0.3 + 0.2
   ]
   reset-ticks
 end
 
 to go
   ask turtles [
-    set machine_decrochage random-float 1.0 + 0.2
     set label int (pourcent_decrochage * 100)
     if ticks = 16 [ if compteur > 1 [set note  25 / 20 + 0.3]]
     if ticks = 16 [ if compteur = 0 [set note  10 / 20]]
-    if decrocher = 0 [ set pourcent_decrochage  (Difficulte_des_cours * filiere * pb_perso * influence * decrochage_base)]
-    if decrocher = 0 and (ticks = 16 or ticks = 17 or ticks = 18 or ticks = 19)[ set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * influence * decrochage_base)]
+    if decrocher = 0 [ set pourcent_decrochage  (Difficulte_des_cours * filiere * pb_perso * decrochage_base)]
+    if decrocher = 0 and (ticks = 16 or ticks = 17 or ticks = 18 or ticks = 19)[ set pourcent_decrochage  (Difficulte_des_cours * filiere * note * pb_perso * decrochage_base)]
     if decrocher = 0[set taux random-float 0.4 + 0.8]
     if decrocher = 0[set pourcent_decrochage  (pourcent_decrochage * taux)]
     if decrocher = 0 [if machine_decrochage < pourcent_decrochage [set color rgb 255 140 0]]
@@ -60,10 +58,11 @@ to go
     if compteur > 2 [set decrocher 1]
 
 
-    ;ICI ON DOIT GERER LE RECROCHAGE
-
-
-
+    set machine_decrochage random-float 1.0 + 0.2
+    if decrocher = 1 [set machine_recrochage random-float 1.0]
+    if decrocher = 1 [ if machine_recrochage >= revenir [set decrocher 0]]
+    if decrocher = 1 [ if machine_recrochage >= revenir [set pourcent_decrochage random-float 0.2 + 0.1]]
+    if decrocher = 1 [ if machine_recrochage < revenir [set revenir revenir + 0.05]]
 
 
   ]
