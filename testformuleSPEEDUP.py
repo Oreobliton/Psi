@@ -172,26 +172,40 @@ def simulation2():
 
 
 
-def simulation3(): #EN COURS DE TRAVAIL
+def simulation3(): 
     promo = list()
     evolution = list() #cette liste contiendra les données concernant l'évolution des groupes au long de l'année (utile pour les graphiques)
     for i in range(20):
         promo.append(Groupe())
     semaine = 0
-    while semaine < 10:
+    while semaine < 42:
+        addition = 0
         for i in range(len(promo)-1): #-1 parce que sinon on dépasse la taille de la promo et c'est pas fou
-                
             if promo[i].decrocher == False: #Cas où le groupe n'a pas décroché, on vérifie qu'il aille en cours cette semaine
                 promo[i].variationDurantLannee() 
                 compteurDecrochage(promo[i])
-                evolution.append(promo[i].taux_Decrochage *100)
-
+                addition += (promo[i].taux_Decrochage *100)
             elif promo[i].decrocher == True:
                 raccrochage(promo[i])
+        evolution.append(addition/20)
         semaine+=1 
     return evolution
 
-
+def simulation4(): #EN COURS DE TRAVAIL
+    promo = list()
+    evolution = list() #cette liste contiendra les données concernant l'évolution des groupes au long de l'année (utile pour les graphiques)
+    for i in range(20):
+        promo.append(Groupe())
+    semaine = 0
+    while semaine < 42:
+        dehors = 0
+        for i in promo:
+            print(i.decrocher)#-1 parce que sinon on dépasse la taille de la promo et c'est pas fou
+            if i.decrocher: #Cas où le groupe n'a pas décroché, on vérifie qu'il aille en cours cette semaine
+                dehors += 1
+        evolution.append(dehors)
+        semaine+=1
+    return evolution
 
 ############################################################################################################################  Partie test  
 """PENSER AU RECROCHAGE"""
